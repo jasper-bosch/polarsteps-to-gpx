@@ -7,9 +7,11 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Parser, Debug)]
 struct Args {
+    // Path to input locations.json file.
     #[arg(short, long)]
     input: String,
 
+    // Path to output .gpx file.
     #[arg(short, long)]
     output: String,
 }
