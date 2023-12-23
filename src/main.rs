@@ -1,3 +1,5 @@
+//! Command-line program that converts a locations.json file from Polarsteps
+//! into a .gpx file.
 use clap::Parser;
 use gpx::{Gpx, GpxVersion, Track};
 use std::error::Error;
