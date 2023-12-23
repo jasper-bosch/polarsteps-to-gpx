@@ -1,5 +1,7 @@
 # polarsteps-to-gpx
-Command-line program that converts a locations.json file from Polarsteps into a .gpx file. The coordinates along with their timestamp are sorted chronologically and then stored as a .gpx file.
+Command-line program that converts a locations.json file from [Polarsteps](https://www.polarsteps.com) to a .gpx file. The coordinates along with their timestamp are sorted chronologically and then stored as a .gpx file.
+
+You can download a copy of your data from Polarsteps by following the steps on [this page](https://support.polarsteps.com/article/124-how-can-i-export-a-copy-of-my-data). The data for each trip is stored in a subfolder of the .zip file. Each of those subfolders contains a `locations.json` file with all the GPS coordinates of your trip.
 
 
 ## Usage
