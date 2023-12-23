@@ -17,6 +17,7 @@ impl Route {
                     point["lat"].as_f64().unwrap(),
                 ));
 
+                // Polarsteps stores timestamp as a Unix timestamp.
                 let t: i64 = point["time"].as_f64().unwrap() as i64;
                 let timestamp = time::OffsetDateTime::from_unix_timestamp(t).unwrap();
                 new_point.time = Some(timestamp.into());
@@ -24,12 +25,10 @@ impl Route {
                 points.push(new_point);
             }
 
-            // Sort waypoints chronologically.
+            // Waypoints are not guaranteed to be in chronological order in the .json file.
             points.sort_by(|p1, p2| p1.time.cmp(&p2.time));
 
-            for point in points {
-                trkseg.points.push(point);
-            }
+            trkseg.points = points;
         }
 
         Route { track: trkseg }
