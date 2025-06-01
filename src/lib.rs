@@ -1,25 +1,27 @@
 use geo_types::Point;
 use gpx::{TrackSegment, Waypoint};
 
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
 pub struct Route {
     pub track: TrackSegment,
 }
 
 impl Route {
-    pub fn new(json: serde_json::Value) -> Self {
+    pub fn new(json: serde_json::Value) -> Result<Self> {
         let mut trkseg = TrackSegment::new();
         let locations = &json["locations"];
         if let Some(arr) = locations.as_array() {
             let mut points: Vec<Waypoint> = vec![];
             for point in arr {
                 let mut new_point = Waypoint::new(Point::new(
-                    point["lon"].as_f64().unwrap(),
-                    point["lat"].as_f64().unwrap(),
+                    point["lon"].as_f64().ok_or("Can't parse longitude")?,
+                    point["lat"].as_f64().ok_or("Can't parse latitude")?,
                 ));
 
                 // Polarsteps stores timestamp as a Unix timestamp.
-                let t: i64 = point["time"].as_f64().unwrap() as i64;
-                let timestamp = time::OffsetDateTime::from_unix_timestamp(t).unwrap();
+                let t: i64 = point["time"].as_f64().ok_or("Can't parse time")? as i64;
+                let timestamp = time::OffsetDateTime::from_unix_timestamp(t)?;
                 new_point.time = Some(timestamp.into());
 
                 points.push(new_point);
@@ -31,6 +33,6 @@ impl Route {
             trkseg.points = points;
         }
 
-        Route { track: trkseg }
+        Ok(Route { track: trkseg })
     }
 }
