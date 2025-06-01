@@ -31,5 +31,8 @@ lint:
 
 rebuild: clean build
 
+run:
+    cargo run
+
 test:
     cargo test
