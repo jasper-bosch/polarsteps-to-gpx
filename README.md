@@ -5,11 +5,13 @@ You can download a copy of your data from Polarsteps by following the steps on [
 
 
 ## Usage
-Two command-line arguments are required:
+Two (optional) command-line arguments are:
 
-1. The path to the input file
-1. The path to the output file
+1. The path to the input file. When this argument is not provided, the program will search for a file called `locations.json` in the current directory.
+1. The path to the output file. When this argument is not provided, the program will simply replace the extension of the input file from `.json` to `.gpx` and use that.
 
 Example:
 
     cargo run -- --input "/home/user/locations.json" --output "/home/user/my-trip.gpx"
+
+You can also install the program by running `cargo install --path .` (or `just install` if you have [just](https://github.com/casey/just) installed). After that, you can run `polarsteps-to-gpx` in any folder. So you could open the folder of the trip you want to convert the `locations.json` file for in the terminal, and simply run `polarsteps-to-gpx`.
