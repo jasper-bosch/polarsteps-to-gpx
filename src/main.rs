@@ -1,11 +1,11 @@
 //! Command-line program that converts a locations.json file from Polarsteps
 //! into a .gpx file.
-use clap::Parser;
-use gpx::{Gpx, GpxVersion, Track};
-use std::error::Error;
 use std::fs;
 
-type MyResult<T> = Result<T, Box<dyn Error>>;
+use clap::Parser;
+use gpx::{Gpx, GpxVersion, Track};
+
+use polarsteps_to_gpx::Result;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -26,12 +26,12 @@ fn main() {
     }
 }
 
-fn run(args: Args) -> MyResult<()> {
+fn run(args: Args) -> Result<()> {
     match fs::read_to_string(&args.input) {
         Err(e) => eprintln!("{}: {}", args.input, e),
         Ok(file_contents) => {
-            let trip = serde_json::from_str(&file_contents).unwrap();
-            let route = polarsteps_to_gpx::Route::new(trip);
+            let trip = serde_json::from_str(&file_contents)?;
+            let route = polarsteps_to_gpx::Route::new(trip)?;
             let track = Track {
                 segments: vec![route.track],
                 ..Default::default()
@@ -51,7 +51,7 @@ fn run(args: Args) -> MyResult<()> {
             };
 
             let buffer = fs::File::create(output_path)?;
-            gpx::write(&data, buffer).unwrap();
+            gpx::write(&data, buffer)?;
         }
     }
 
