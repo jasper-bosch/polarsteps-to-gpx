@@ -21,7 +21,7 @@ struct Args {
 
 fn main() {
     if let Err(e) = run(Args::parse()) {
-        eprintln!("{}", e);
+        eprintln!("{e}");
         std::process::exit(1);
     }
 }
