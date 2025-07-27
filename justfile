@@ -74,6 +74,11 @@ init:
 test:
     cargo test
 
+# Upgrade dependencies (requires cargo-edit)
+[group('dev')]
+upgrade:
+    cargo upgrade
+
 ################################################################################
 
 # Bump the major version (requires cargo-edit)
