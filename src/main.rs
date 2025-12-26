@@ -2,10 +2,9 @@
 //! into a .gpx file.
 use std::fs;
 
+use anyhow::Result;
 use clap::Parser;
 use gpx::{Gpx, GpxVersion, Track};
-
-use polarsteps_to_gpx::Result;
 
 #[derive(Parser, Debug)]
 struct Args {
