@@ -29,7 +29,7 @@ fn run(args: Args) -> Result<()> {
     match fs::read_to_string(&args.input) {
         Err(e) => eprintln!("{}: {}", args.input, e),
         Ok(file_contents) => {
-            let trip = serde_json::from_str(&file_contents)?;
+            let trip = &serde_json::from_str(&file_contents)?;
             let route = polarsteps_to_gpx::Route::new(trip)?;
             let track = Track {
                 segments: vec![route.track],

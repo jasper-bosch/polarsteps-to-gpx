@@ -7,7 +7,9 @@ pub struct Route {
 }
 
 impl Route {
-    pub fn new(json: serde_json::Value) -> Result<Self> {
+    /// # Errors
+    /// - If latitude, longitude, or time cannot be parsed from the JSON.
+    pub fn new(json: &serde_json::Value) -> Result<Self> {
         let mut trkseg = TrackSegment::new();
         let locations = &json["locations"];
         if let Some(arr) = locations.as_array() {
@@ -19,7 +21,8 @@ impl Route {
                 ));
 
                 // Polarsteps stores timestamp as a Unix timestamp.
-                let t: i64 = point["time"].as_f64().context("Can't parse time")? as i64;
+                #[allow(clippy::cast_possible_truncation)]
+                let t = point["time"].as_f64().context("Can't parse time")? as i64;
                 let timestamp = time::OffsetDateTime::from_unix_timestamp(t)?;
                 new_point.time = Some(timestamp.into());
 
