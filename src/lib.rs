@@ -21,8 +21,7 @@ impl Route {
                 ));
 
                 // Polarsteps stores timestamp as a Unix timestamp.
-                #[allow(clippy::cast_possible_truncation)]
-                let t = point["time"].as_f64().context("Can't parse time")? as i64;
+                let t = point["time"].as_i64().context("Can't parse time")?;
                 let timestamp = time::OffsetDateTime::from_unix_timestamp(t)?;
                 new_point.time = Some(timestamp.into());
 
