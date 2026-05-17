@@ -21,7 +21,11 @@ impl Route {
                 ));
 
                 // Polarsteps stores timestamp as a Unix timestamp.
-                let t = point["time"].as_i64().context("Can't parse time")?;
+                #[allow(clippy::cast_possible_truncation)]
+                let t = point["time"]
+                    .as_f64()
+                    .context(format!("Can't parse time as f64: {}", point["time"]))?
+                    as i64;
                 let timestamp = time::OffsetDateTime::from_unix_timestamp(t)?;
                 new_point.time = Some(timestamp.into());
 
@@ -29,7 +33,7 @@ impl Route {
             }
 
             // Waypoints are not guaranteed to be in chronological order in the .json file.
-            points.sort_by(|p1, p2| p1.time.cmp(&p2.time));
+            points.sort_by_key(|p| p.time);
 
             trkseg.points = points;
         }
