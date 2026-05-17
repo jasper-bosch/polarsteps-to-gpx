@@ -3,6 +3,13 @@
 
 ## Unreleased
 
+
+## 0.1.3 - 2026-05-17
+
+### Fixed
+
+- Support floating-point Unix timestamps in locations.json
+
 ### Changed
 
 - Switched to [anyhow](https://crates.io/crates/anyhow) to handle errors
