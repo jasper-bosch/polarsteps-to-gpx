@@ -30,6 +30,7 @@ fn run(args: Args) -> Result<()> {
     let file_contents = fs::read_to_string(&args.input).with_context(|| args.input.clone())?;
     let trip = &serde_json::from_str(&file_contents)?;
     let route = polarsteps_to_gpx::Route::new(trip)?;
+    let point_count = route.track.points.len();
     let track = Track {
         segments: vec![route.track],
         ..Default::default()
@@ -51,8 +52,9 @@ fn run(args: Args) -> Result<()> {
         args.output
     };
 
-    let buffer = fs::File::create(output_path)?;
+    let buffer = fs::File::create(&output_path)?;
     gpx::write(&data, buffer)?;
+    println!("{point_count} points written to {output_path}");
 
     Ok(())
 }
