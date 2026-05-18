@@ -1,8 +1,9 @@
 //! Command-line program that converts a locations.json file from Polarsteps
 //! into a .gpx file.
 use std::fs;
+use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::Parser;
 use gpx::{Gpx, GpxVersion, Track};
 
@@ -26,33 +27,32 @@ fn main() {
 }
 
 fn run(args: Args) -> Result<()> {
-    match fs::read_to_string(&args.input) {
-        Err(e) => eprintln!("{}: {}", args.input, e),
-        Ok(file_contents) => {
-            let trip = &serde_json::from_str(&file_contents)?;
-            let route = polarsteps_to_gpx::Route::new(trip)?;
-            let track = Track {
-                segments: vec![route.track],
-                ..Default::default()
-            };
+    let file_contents = fs::read_to_string(&args.input).with_context(|| args.input.clone())?;
+    let trip = &serde_json::from_str(&file_contents)?;
+    let route = polarsteps_to_gpx::Route::new(trip)?;
+    let track = Track {
+        segments: vec![route.track],
+        ..Default::default()
+    };
 
-            let data = Gpx {
-                version: GpxVersion::Gpx11,
-                creator: Some("polarsteps-to-gpx".to_string()),
-                tracks: vec![track],
-                ..Default::default()
-            };
+    let data = Gpx {
+        version: GpxVersion::Gpx11,
+        creator: Some("polarsteps-to-gpx".to_string()),
+        tracks: vec![track],
+        ..Default::default()
+    };
 
-            let output_path = if args.output.is_empty() {
-                args.input.replace(".json", ".gpx")
-            } else {
-                args.output
-            };
+    let output_path = if args.output.is_empty() {
+        Path::new(&args.input)
+            .with_extension("gpx")
+            .to_string_lossy()
+            .into_owned()
+    } else {
+        args.output
+    };
 
-            let buffer = fs::File::create(output_path)?;
-            gpx::write(&data, buffer)?;
-        }
-    }
+    let buffer = fs::File::create(output_path)?;
+    gpx::write(&data, buffer)?;
 
     Ok(())
 }
