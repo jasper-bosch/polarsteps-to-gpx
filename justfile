@@ -51,6 +51,11 @@ lint:
 
 ################################################################################
 
+# Check the code coverage of the project (requires cargo-tarpaulin).
+[group('dev')]
+coverage:
+    cargo tarpaulin --engine llvm
+
 # Generate and open the documentation
 [group('dev')]
 docs:
@@ -67,6 +72,7 @@ init:
     cargo install cargo-edit
     cargo install cargo-machete
     cargo install cargo-outdated
+    cargo install --locked cargo-tarpaulin
     cargo install cargo-unmaintained
 
 # Run the tests
