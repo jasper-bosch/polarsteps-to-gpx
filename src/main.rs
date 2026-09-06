@@ -1,7 +1,10 @@
 //! Command-line program that converts a locations.json file from Polarsteps
 //! into a .gpx file.
-use std::fs;
-use std::path::Path;
+use std::{
+    fs,
+    io::{BufWriter, Write},
+    path::Path,
+};
 
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -52,8 +55,9 @@ fn run(args: Args) -> Result<()> {
         args.output
     };
 
-    let buffer = fs::File::create(&output_path)?;
-    gpx::write(&data, buffer)?;
+    let mut buffer = BufWriter::new(fs::File::create(&output_path)?);
+    gpx::write(&data, &mut buffer)?;
+    buffer.flush()?;
     println!("{point_count} points written to {output_path}");
 
     Ok(())
