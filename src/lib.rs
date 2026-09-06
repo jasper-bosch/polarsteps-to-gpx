@@ -8,35 +8,37 @@ pub struct Route {
 
 impl Route {
     /// # Errors
+    /// - If the JSON has no `locations` array.
     /// - If latitude, longitude, or time cannot be parsed from the JSON.
     pub fn new(json: &serde_json::Value) -> Result<Self> {
         let mut trkseg = TrackSegment::new();
-        let locations = &json["locations"];
-        if let Some(arr) = locations.as_array() {
-            let mut points: Vec<Waypoint> = vec![];
-            for point in arr {
-                let mut new_point = Waypoint::new(Point::new(
-                    point["lon"].as_f64().context("Can't parse longitude")?,
-                    point["lat"].as_f64().context("Can't parse latitude")?,
-                ));
+        let locations = json["locations"]
+            .as_array()
+            .context("No `locations` array in the JSON. Is this a Polarsteps locations.json?")?;
 
-                // Polarsteps stores timestamp as a Unix timestamp.
-                #[allow(clippy::cast_possible_truncation)]
-                let t = point["time"]
-                    .as_f64()
-                    .context(format!("Can't parse time as f64: {}", point["time"]))?
-                    as i64;
-                let timestamp = time::OffsetDateTime::from_unix_timestamp(t)?;
-                new_point.time = Some(timestamp.into());
+        let mut points: Vec<Waypoint> = vec![];
+        for point in locations {
+            let mut new_point = Waypoint::new(Point::new(
+                point["lon"].as_f64().context("Can't parse longitude")?,
+                point["lat"].as_f64().context("Can't parse latitude")?,
+            ));
 
-                points.push(new_point);
-            }
+            // Polarsteps stores timestamp as a Unix timestamp.
+            #[allow(clippy::cast_possible_truncation)]
+            let t = point["time"]
+                .as_f64()
+                .context(format!("Can't parse time as f64: {}", point["time"]))?
+                as i64;
+            let timestamp = time::OffsetDateTime::from_unix_timestamp(t)?;
+            new_point.time = Some(timestamp.into());
 
-            // Waypoints are not guaranteed to be in chronological order in the .json file.
-            points.sort_by_key(|p| p.time);
-
-            trkseg.points = points;
+            points.push(new_point);
         }
+
+        // Waypoints are not guaranteed to be in chronological order in the .json file.
+        points.sort_by_key(|p| p.time);
+
+        trkseg.points = points;
 
         Ok(Route { track: trkseg })
     }
@@ -72,6 +74,31 @@ mod tests {
         let route = Route::new(&input).unwrap();
 
         assert_eq!(timestamps(&route), vec![500_000, 1_000_000, 1_500_000]);
+    }
+
+    #[test]
+    fn errors_when_locations_key_is_missing() {
+        let input = json!({ "trip": { "name": "Spain" } });
+
+        let err = Route::new(&input).err().expect("expected an error");
+
+        assert!(err.to_string().contains("locations"), "got: {err}");
+    }
+
+    #[test]
+    fn errors_when_locations_is_not_an_array() {
+        let input = json!({ "locations": { "lat": 52.0, "lon": 4.0 } });
+
+        assert!(Route::new(&input).is_err());
+    }
+
+    #[test]
+    fn accepts_an_empty_locations_array() {
+        let input = json!({ "locations": [] });
+
+        let route = Route::new(&input).unwrap();
+
+        assert!(route.track.points.is_empty());
     }
 
     #[test]
