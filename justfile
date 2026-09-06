@@ -32,10 +32,19 @@ rebuild: clean build
 [group('check')]
 check:
     cargo fmt -- --check
-    cargo clippy -- -D warnings
+    cargo clippy --all-targets -- -D warnings
     cargo test
     cargo machete
     cargo outdated -R
+
+# Run the checks that CI runs (requires cargo-machete)
+[group('check')]
+ci: format-check lint unused test
+
+# Check formatting without changing any files
+[group('check')]
+format-check:
+    cargo fmt --check
 
 # Check for unused/outdated/unmaintained dependencies (requires cargo-machete, -outdated and -unmaintained)
 [group('check')]
@@ -47,7 +56,12 @@ deps:
 # Run clippy on the project and treat warnings as errors
 [group('check')]
 lint:
-    cargo clippy -- -D warnings
+    cargo clippy --all-targets -- -D warnings
+
+# Check for unused dependencies (requires cargo-machete)
+[group('check')]
+unused:
+    cargo machete
 
 ################################################################################
 
