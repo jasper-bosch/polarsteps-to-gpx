@@ -12,13 +12,12 @@ use gpx::{Gpx, GpxVersion, Track};
 
 #[derive(Parser, Debug)]
 struct Args {
-    // Path to input locations.json file. Default to current directory.
+    /// Path to the input locations.json file
     #[arg(short, long, default_value = "locations.json")]
     input: String,
 
-    // Path to output .gpx file (optional).
-    // If not provided, it will default to "locations.gpx" in the current directory.
-    #[arg(short, long, default_value = "")]
+    /// Path to the output .gpx file [default: the input path with a .gpx extension]
+    #[arg(short, long, default_value = "", hide_default_value = true)]
     output: String,
 }
 
