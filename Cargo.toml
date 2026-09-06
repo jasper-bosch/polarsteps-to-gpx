@@ -20,8 +20,6 @@ pedantic = "deny"
 unwrap_used = "deny"
 
 [profile.release]
-opt-level = "z"   # Optimize for size.
-lto = true        # Enable Link Time Optimization.
-codegen-units = 1 # Reduced to increase optimizations.
+opt-level = 3     # Optimize for speed (cargo's release default).
 panic = "abort"   # Abort on panic.
 strip = "symbols" # Strip symbols from binary.
