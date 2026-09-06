@@ -3,7 +3,7 @@
 use std::{
     fs,
     io::{BufWriter, Write},
-    path::Path,
+    path::PathBuf,
 };
 
 use anyhow::{Context, Result};
@@ -14,11 +14,11 @@ use gpx::{Gpx, GpxVersion, Track};
 struct Args {
     /// Path to the input locations.json file
     #[arg(short, long, default_value = "locations.json")]
-    input: String,
+    input: PathBuf,
 
     /// Path to the output .gpx file [default: the input path with a .gpx extension]
-    #[arg(short, long, default_value = "", hide_default_value = true)]
-    output: String,
+    #[arg(short, long)]
+    output: Option<PathBuf>,
 }
 
 fn main() {
@@ -29,7 +29,8 @@ fn main() {
 }
 
 fn run(args: Args) -> Result<()> {
-    let file_contents = fs::read_to_string(&args.input).with_context(|| args.input.clone())?;
+    let file_contents =
+        fs::read_to_string(&args.input).with_context(|| args.input.display().to_string())?;
     let trip = &serde_json::from_str(&file_contents)?;
     let route = polarsteps_to_gpx::Route::new(trip)?;
     let point_count = route.track.points.len();
@@ -45,20 +46,18 @@ fn run(args: Args) -> Result<()> {
         ..Default::default()
     };
 
-    let output_path = if args.output.is_empty() {
-        Path::new(&args.input)
-            .with_extension("gpx")
-            .to_string_lossy()
-            .into_owned()
-    } else {
-        args.output
-    };
+    let output_path = args
+        .output
+        .unwrap_or_else(|| args.input.with_extension("gpx"));
 
-    let mut buffer =
-        BufWriter::new(fs::File::create(&output_path).with_context(|| output_path.clone())?);
-    gpx::write(&data, &mut buffer).with_context(|| output_path.clone())?;
-    buffer.flush().with_context(|| output_path.clone())?;
-    println!("{point_count} points written to {output_path}");
+    let mut buffer = BufWriter::new(
+        fs::File::create(&output_path).with_context(|| output_path.display().to_string())?,
+    );
+    gpx::write(&data, &mut buffer).with_context(|| output_path.display().to_string())?;
+    buffer
+        .flush()
+        .with_context(|| output_path.display().to_string())?;
+    println!("{point_count} points written to {}", output_path.display());
 
     Ok(())
 }
