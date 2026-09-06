@@ -23,7 +23,7 @@ struct Args {
 
 fn main() {
     if let Err(e) = run(Args::parse()) {
-        eprintln!("{e}");
+        eprintln!("{e:?}");
         std::process::exit(1);
     }
 }
@@ -54,9 +54,10 @@ fn run(args: Args) -> Result<()> {
         args.output
     };
 
-    let mut buffer = BufWriter::new(fs::File::create(&output_path)?);
-    gpx::write(&data, &mut buffer)?;
-    buffer.flush()?;
+    let mut buffer =
+        BufWriter::new(fs::File::create(&output_path).with_context(|| output_path.clone())?);
+    gpx::write(&data, &mut buffer).with_context(|| output_path.clone())?;
+    buffer.flush().with_context(|| output_path.clone())?;
     println!("{point_count} points written to {output_path}");
 
     Ok(())
