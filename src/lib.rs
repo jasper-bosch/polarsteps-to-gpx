@@ -98,7 +98,7 @@ mod tests {
 
         let route = Route::new(&input).unwrap();
 
-        assert!(route.track.points.is_empty());
+        assert_eq!(route.track.points, [] as [gpx::Waypoint; 0]);
     }
 
     #[test]
